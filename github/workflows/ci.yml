@@ -1,0 +1,41 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout do código
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Instala Podman
+      - name: Install Podman
+        run: sudo apt-get update && sudo apt-get install -y podman
+
+      # Build do serviço de produtos
+      - name: Build produtos service
+        run: podman build -t produtos-service ./produtos_service
+
+      # Build do serviço de pagamentos
+      - name: Build pagamentos service
+        run: podman build -t pagamentos-service ./pagamentos_service
+
+      # Build do banco de dados
+      - name: Build db service
+        run: podman build -t shoop-db ./db
+
+      # Testes básicos de endpoints
+      - name: Run containers for testing
+        run: |
+          podman run -d -p 8000:8000 --name produtos produtos-service
+          podman run -d -p 8001:8001 --name pagamentos pagamentos-service
+          sleep 10
+          curl -f http://localhost:8000/produtos || exit 1
+          curl -f http://localhost:8001/pagamentos || exit 1
