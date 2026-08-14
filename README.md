@@ -21,25 +21,34 @@ Este projeto contém três serviços principais:
 
 ### 1. Build das imagens
 Na raiz do projeto:
-```bash
+```
 podman build -t shoop-db:latest ./db
 podman build -t produtos-service:latest ./produtos_service
 podman build -t pagamentos-service:latest ./pagamentos_service
 
 ---
-
+```
 ##  Instruções de Execução
 
 ### 1. Ambiente Local (Podman/Docker)
-```bash
+```
 podman-compose up --build
 
+```
 Endpoints disponíveis:
 
-Produtos: http://localhost:8000/produtos
+Produtos:
 
-Pagamentos: http://localhost:8001/pagamentos
+``` 
+http://localhost:8000/produtos
 
+```
+Pagamentos:
+
+```
+http://localhost:8001/pagamentos
+
+```
 Rodando com Podman Desktop
 Abra o Podman Desktop.
 
@@ -53,29 +62,34 @@ Use o painel do Podman Desktop para visualizar logs e endpoints.
 
 Rodando com Minikube
 1. Iniciar cluster
-bash
+```
 minikube start --driver=docker
+```
 2. Carregar imagens locais
-bash
+```
 minikube image load shoop-db:latest
 minikube image load produtos-service:latest
 minikube image load pagamentos-service:latest
+```
 3. Aplicar manifests
-bash
+```
 kubectl apply -f k8s/deployment-db.yaml
 kubectl apply -f k8s/service-db.yaml
 kubectl apply -f k8s/deployment-produtos.yaml
 kubectl apply -f k8s/service-produtos.yaml
 kubectl apply -f k8s/deployment-pagamentos.yaml
 kubectl apply -f k8s/service-pagamentos.yaml
+```
 4. Verificar pods e serviços
-bash
+```
 kubectl get pods
 kubectl get svc
+```
 5. Acessar endpoints
-bash
+```
 minikube service produtos-service
 minikube service pagamentos-service
+```
  Testes de API
 Produtos
 Listar produtos
@@ -87,11 +101,13 @@ Adicionar produto
 http
 POST /produtos
 Body:
+```
 {
   "nome": "Notebook",
   "preco": 3500.00,
   "quantidade": 10
 }
+```
 Pagamentos
 Listar pagamentos
 
@@ -102,24 +118,30 @@ Registrar pagamento
 http
 POST /pagamentos
 Body:
+```
 {
   "produto_id": 1,
   "quantidade": 2,
   "valor": 7000.00
 }
+```
  Deployments e Services
 Ver todos os deployments
-bash
+```
 kubectl get deployments
+```
 Ver todos os services
-bash
+```
 kubectl get svc
+```
 Ver detalhes de um deployment
-bash
+```
 kubectl describe deployment produtos-deployment
+```
 Ver detalhes de um service
-bash
+```
 kubectl describe svc produtos-service
+```
 Fluxo de validação
 Criar produto via POST /produtos.
 
