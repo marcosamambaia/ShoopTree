@@ -1,51 +1,40 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
 import psycopg2
 import os
+from event_bus import event_bus
 
-# Inicializa a aplicação FastAPI
 app = FastAPI()
 
-# Configuração da conexão com o banco de dados
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "dbname=shoopdb user=marco password=marco123 host=db port=5432"
 )
 
-# Modelo de dados para entrada de produto
-class Produto(BaseModel):
-    nome: str
-    preco: float
-    quantidade: int
-
-# GET /produtos → lista todos os produtos
-@app.get("/produtos")
-def listar_produtos():
+# Lista notificações
+@app.get("/notificacoes")
+def listar_notificacoes():
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
-    cur.execute("SELECT id, nome, preco, quantidade FROM produtos")
+    cur.execute("SELECT id, compra_id, mensagem FROM notificacoes")
     rows = cur.fetchall()
     conn.close()
+    return [{"id": r[0], "compra_id": r[1], "mensagem": r[2]} for r in rows]
 
-    return [
-        {"id": r[0], "nome": r[1], "preco": float(r[2]), "quantidade": r[3]}
-        for r in rows
-    ]
-
-# POST /produtos → adiciona novo produto ao estoque
-@app.post("/produtos")
-def adicionar_produto(produto: Produto):
+# Handler para evento de pagamento confirmado
+def handle_pagamento_confirmado(evento):
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
     cur.execute(
-        "INSERT INTO produtos (nome, preco, quantidade) VALUES (%s, %s, %s) RETURNING id",
-        (produto.nome, produto.preco, produto.quantidade)
+        "INSERT INTO notificacoes (compra_id, mensagem) VALUES (%s, %s)",
+        (evento["compra_id"], f"Pagamento confirmado para compra {evento['compra_id']}")
     )
-    novo_id = cur.fetchone()[0]
     conn.commit()
     conn.close()
+    print(f"[Notificação] Cliente informado sobre pagamento da compra {evento['compra_id']}")
 
-    return {"mensagem": "Produto adicionado com sucesso!", "id": novo_id}
+# Inscreve no evento
+event_bus.subscribe("PAGAMENTO_CONFIRMADO", handle_pagamento_confirmado)
+
 from typing import List, Callable
 
 class EventBus:

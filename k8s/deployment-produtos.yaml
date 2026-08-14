@@ -14,10 +14,10 @@ spec:
     spec:
       containers:
         - name: produtos
-          image: produtos-service:latest
+          image: produtos:latest   # nome correto
           imagePullPolicy: Never
           ports:
             - containerPort: 8000
           env:
             - name: DATABASE_URL
-              value: "dbname=shoopdb user=admin password=admin host=db-service port=5432"
+              value: "dbname=shoopdb user=marco password=marco123 host=db-service port=5432"

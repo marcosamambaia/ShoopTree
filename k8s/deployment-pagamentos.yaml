@@ -14,10 +14,10 @@ spec:
     spec:
       containers:
         - name: pagamentos
-          image: pagamentos-service:latest
-          imagePullPolicy: Never
+          image: pagamentos:latest   # nome correto da imagem
+          imagePullPolicy: Never               # não tenta puxar da internet
           ports:
             - containerPort: 8001
           env:
             - name: DATABASE_URL
-              value: "dbname=shoopdb user=admin password=admin host=db-service port=5432"
+              value: "dbname=shoopdb user=marco password=marco123 host=db-service port=5432"

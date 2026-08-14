@@ -12,6 +12,17 @@ services:
     networks:
       - shoopnet
 
+  compras:
+    build: ./compras_service
+    container_name: compras_service
+    ports:
+      - "8002:8002"
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - shoopnet
+
   pagamentos:
     build: ./pagamentos_service
     container_name: pagamentos_service
@@ -23,8 +34,33 @@ services:
     networks:
       - shoopnet
 
+  notificacoes:
+    build: ./notificacao_service
+    container_name: notificacao_service
+    ports:
+      - "8003:8003"
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - shoopnet
+
+  shoop_api:
+    build: ./shoop_api
+    container_name: shoop_api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - produtos
+      - pagamentos
+      - notificacoes
+      - db
+    restart: unless-stopped
+    networks:
+      - shoopnet
+
   db:
-    image: docker.io/library/postgres:16
+    image: postgres:16
     container_name: shoop_db
     environment:
       POSTGRES_USER: marco

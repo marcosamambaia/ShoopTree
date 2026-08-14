@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shoop-api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shoop-api
+  template:
+    metadata:
+      labels:
+        app: shoop-api
+    spec:
+      containers:
+        - name: shoop-api
+          image: shoop-api:latest         # imagem que você buildou localmente
+          imagePullPolicy: Never          # não tenta puxar da internet
+          ports:
+            - containerPort: 8080

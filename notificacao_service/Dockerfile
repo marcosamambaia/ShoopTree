@@ -13,5 +13,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia o restante do código
 COPY . .
 
-# Comando padrão para iniciar o serviço na porta 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Comando padrão para iniciar o serviço na porta 8003
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003"]

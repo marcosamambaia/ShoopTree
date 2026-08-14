@@ -14,14 +14,14 @@ spec:
     spec:
       containers:
         - name: db
-          image: shoop-db:latest
-          imagePullPolicy: Never
+          image: postgres:16              # nome igual ao docker-compose
+          imagePullPolicy: IfNotPresent        # força usar a imagem local
           ports:
             - containerPort: 5432
           env:
             - name: POSTGRES_USER
-              value: "admin"
+              value: "marco"
             - name: POSTGRES_PASSWORD
-              value: "admin"
+              value: "marco123"
             - name: POSTGRES_DB
               value: "shoopdb"

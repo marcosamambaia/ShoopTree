@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: compras-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: compras
+  template:
+    metadata:
+      labels:
+        app: compras
+    spec:
+      containers:
+        - name: compras
+          image: compras:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8002
+          env:
+            - name: DATABASE_URL
+              value: "dbname=shoopdb user=marco password=marco123 host=db port=5432"
