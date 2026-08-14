@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  produtos:
+    build: ./produtos_service
+    container_name: produtos_service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - shoopnet
+
+  pagamentos:
+    build: ./pagamentos_service
+    container_name: pagamentos_service
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - shoopnet
+
+  db:
+    image: docker.io/library/postgres:16
+    container_name: shoop_db
+    environment:
+      POSTGRES_USER: marco
+      POSTGRES_PASSWORD: marco123
+      POSTGRES_DB: shoopdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - shoopnet
+
+volumes:
+  pgdata:
+
+networks:
+  shoopnet:

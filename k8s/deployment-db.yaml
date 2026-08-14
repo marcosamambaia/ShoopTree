@@ -13,14 +13,15 @@ spec:
         app: db
     spec:
       containers:
-      - name: db
-        image: shoop-db:latest
-        ports:
-        - containerPort: 5432
-        env:
-        - name: POSTGRES_USER
-          value: "admin"
-        - name: POSTGRES_PASSWORD
-          value: "admin"
-        - name: POSTGRES_DB
-          value: "shoopdb"
+        - name: db
+          image: shoop-db:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: "admin"
+            - name: POSTGRES_PASSWORD
+              value: "admin"
+            - name: POSTGRES_DB
+              value: "shoopdb"

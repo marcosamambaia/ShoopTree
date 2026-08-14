@@ -10,6 +10,22 @@ Este projeto é uma prova de conceito funcional que demonstra:
 - Pipeline de **CI/CD com GitHub Actions**.
 - Diagramas arquiteturais utilizando **C4 Model**.
 
+# ShoopTree — Microserviços com FastAPI + PostgreSQL
+
+Este projeto contém três serviços principais:
+- **Banco de dados (Postgres)**
+- **Serviço de Produtos (FastAPI)**
+- **Serviço de Pagamentos (FastAPI)**
+
+##  Rodando com Podman
+
+### 1. Build das imagens
+Na raiz do projeto:
+```bash
+podman build -t shoop-db:latest ./db
+podman build -t produtos-service:latest ./produtos_service
+podman build -t pagamentos-service:latest ./pagamentos_service
+
 ---
 
 ##  Instruções de Execução
@@ -17,88 +33,98 @@ Este projeto é uma prova de conceito funcional que demonstra:
 ### 1. Ambiente Local (Podman/Docker)
 ```bash
 podman-compose up --build
+
 Endpoints disponíveis:
 
 Produtos: http://localhost:8000/produtos
 
 Pagamentos: http://localhost:8001/pagamentos
 
-2. Kubernetes (Minikube)
-bash
-minikube start --driver=podman
-kubectl apply -f k8s/
-kubectl get pods
-kubectl get services
-Acesse os serviços via:
+Rodando com Podman Desktop
+Abra o Podman Desktop.
 
+Vá em Containers → Compose → Import Project.
+
+Selecione o diretório do projeto (ShoopTree).
+
+Clique em Run para iniciar os serviços.
+
+Use o painel do Podman Desktop para visualizar logs e endpoints.
+
+Rodando com Minikube
+1. Iniciar cluster
+bash
+minikube start --driver=docker
+2. Carregar imagens locais
+bash
+minikube image load shoop-db:latest
+minikube image load produtos-service:latest
+minikube image load pagamentos-service:latest
+3. Aplicar manifests
+bash
+kubectl apply -f k8s/deployment-db.yaml
+kubectl apply -f k8s/service-db.yaml
+kubectl apply -f k8s/deployment-produtos.yaml
+kubectl apply -f k8s/service-produtos.yaml
+kubectl apply -f k8s/deployment-pagamentos.yaml
+kubectl apply -f k8s/service-pagamentos.yaml
+4. Verificar pods e serviços
+bash
+kubectl get pods
+kubectl get svc
+5. Acessar endpoints
 bash
 minikube service produtos-service
 minikube service pagamentos-service
-Arquitetura
-Diagrama de Contexto
-[Parece que o resultado não era seguro para exibição. Vamos mudar as coisas e tentar outra opção!]
+ Testes de API
+Produtos
+Listar produtos
 
-Diagrama de Containers
-[Parece que o resultado não era seguro para exibição. Vamos mudar as coisas e tentar outra opção!]
+http
+GET /produtos
+Adicionar produto
 
-Serviços
-Produtos Service
-GET /produtos → lista produtos.
+http
+POST /produtos
+Body:
+{
+  "nome": "Notebook",
+  "preco": 3500.00,
+  "quantidade": 10
+}
+Pagamentos
+Listar pagamentos
 
-POST /produtos → adiciona novo produto.
+http
+GET /pagamentos
+Registrar pagamento
 
-Pagamentos Service
-GET /pagamentos → lista pagamentos.
+http
+POST /pagamentos
+Body:
+{
+  "produto_id": 1,
+  "quantidade": 2,
+  "valor": 7000.00
+}
+ Deployments e Services
+Ver todos os deployments
+bash
+kubectl get deployments
+Ver todos os services
+bash
+kubectl get svc
+Ver detalhes de um deployment
+bash
+kubectl describe deployment produtos-deployment
+Ver detalhes de um service
+bash
+kubectl describe svc produtos-service
+Fluxo de validação
+Criar produto via POST /produtos.
 
-POST /pagamentos → registra pagamento e dispara eventos:
+Listar produtos via GET /produtos.
 
-Notificação por email (simulada).
+Registrar pagamento via POST /pagamentos.
 
-Atualização de estoque (simulada).
-
-vento Simulado
-A arquitetura orientada a eventos foi implementada com o Observer Pattern:
-
-Um pagamento gera um evento.
-
-Observadores reagem automaticamente:
-
-notificar_email()
-
-atualizar_estoque()
-
-Design Pattern Utilizado
-Foi aplicado o Observer Pattern, pois:
-
-Permite que múltiplos componentes reajam a um evento sem acoplamento direto.
-
-Facilita a extensão futura (novos observadores podem ser adicionados sem alterar o core).
-
-Representa bem cenários reais de sistemas orientados a eventos.
-
-CI/CD
-Pipeline configurado em GitHub Actions:
-
-Build das imagens com Podman.
-
-Testes básicos de endpoints.
-
-Execução automática em cada push/pull request para main.
-
-Arquivo: .github/workflows/ci.yml
-
-Tecnologias Utilizadas
-Python 3.12 + FastAPI
-
-PostgreSQL 16
-
-Podman/Docker
-
-Minikube + Kubernetes
-
-GitHub Actions
-
-C4 Model (Structurizr/Draw.io)
-
-Autor
-Projeto desenvolvido por Marco, como prova de conceito para disciplina de Arquitetura de Software.
+Conferir estoque atualizado.

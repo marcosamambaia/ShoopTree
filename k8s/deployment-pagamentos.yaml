@@ -13,10 +13,11 @@ spec:
         app: pagamentos
     spec:
       containers:
-      - name: pagamentos
-        image: pagamentos-service:latest
-        ports:
-        - containerPort: 8001
-        env:
-        - name: DATABASE_URL
-          value: "postgresql://admin:admin@db:5432/shoopdb"
+        - name: pagamentos
+          image: pagamentos-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8001
+          env:
+            - name: DATABASE_URL
+              value: "dbname=shoopdb user=admin password=admin host=db-service port=5432"

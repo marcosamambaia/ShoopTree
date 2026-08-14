@@ -1,42 +1,47 @@
-# Importa o framework FastAPI para criar a API
 from fastapi import FastAPI
-# Importa BaseModel do Pydantic para validar dados recebidos
 from pydantic import BaseModel
-# Importa biblioteca psycopg2 para conectar ao PostgreSQL e os para variáveis de ambiente
-import psycopg2, os
+import psycopg2
+import os
 
-# Cria a aplicação FastAPI
 app = FastAPI()
 
-# URL de conexão ao banco de dados
-# Se não for definida via variável de ambiente, usa o valor padrão
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://admin:admin@db:5432/shoopdb")
+# Usa variável de ambiente ou valor padrão
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "dbname=shoopdb user=marco password=marco123 host=db port=5432"
+)
 
-# Modelo de dados para representar um Produto
 class Produto(BaseModel):
     nome: str
+    preco: float
+    quantidade: int
 
-# Endpoint GET /produtos
-# Lista todos os produtos cadastrados no banco
 @app.get("/produtos")
 def listar_produtos():
-    # Conecta ao banco
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
-    # Executa consulta SQL
-    cur.execute("SELECT id, nome FROM produtos")
+    cur.execute("SELECT id, nome, preco, quantidade FROM produtos")
     rows = cur.fetchall()
-    # Fecha conexão
     conn.close()
-    # Retorna lista de produtos em formato JSON
-    return [{"id": r[0], "nome": r[1]} for r in rows]
+    return [
+        {
+            "id": r[0],
+            "nome": r[1],
+            "preco": float(r[2]) if r[2] is not None else None,
+            "quantidade": r[3] if r[3] is not None else None
+        }
+        for r in rows
+    ]
 
-# Endpoint POST /produtos
-# Adiciona um novo produto ao banco
 @app.post("/produtos")
 def adicionar_produto(produto: Produto):
-    # Conecta ao banco
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
-    # Insere produto e retorna o ID gerado
-    cur.execute("INSERT INTO produtos (nome) VALUES (%s) RETURNING id", (produto.nome,))
+    cur.execute(
+        "INSERT INTO produtos (nome, preco, quantidade) VALUES (%s, %s, %s) RETURNING id",
+        (produto.nome, produto.preco, produto.quantidade)
+    )
+    novo_id = cur.fetchone()[0]
+    conn.commit()
+    conn.close()
+    return {"mensagem": "Produto adicionado com sucesso!", "id": novo_id}

@@ -13,10 +13,11 @@ spec:
         app: produtos
     spec:
       containers:
-      - name: produtos
-        image: produtos-service:latest
-        ports:
-        - containerPort: 8000
-        env:
-        - name: DATABASE_URL
-          value: "postgresql://admin:admin@db:5432/shoopdb"
+        - name: produtos
+          image: produtos-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              value: "dbname=shoopdb user=admin password=admin host=db-service port=5432"

@@ -1,52 +1,66 @@
-# Importa o framework FastAPI para criar a API
-from fastapi import FastAPI
-# Importa BaseModel do Pydantic para validar dados recebidos
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-# Importa psycopg2 para conectar ao PostgreSQL e os para variáveis de ambiente
-import psycopg2, os
+import psycopg2
+import os
 
-# Cria a aplicação FastAPI
 app = FastAPI()
 
-# URL de conexão ao banco de dados
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://admin:admin@db:5432/shoopdb")
+# Usa variável de ambiente ou valor padrão
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "dbname=shoopdb user=marco password=marco123 host=db port=5432"
+)
 
-# Modelo de dados para representar um Pagamento
 class Pagamento(BaseModel):
+    produto_id: int
+    quantidade: int
     valor: float
 
-# Funções que simulam observadores (Observer Pattern)
-def notificar_email(pagamento_id):
-    print(f"Email enviado: pagamento {pagamento_id} registrado.")
-
-def atualizar_estoque(pagamento_id):
-    print(f"Estoque atualizado para pagamento {pagamento_id}.")
-
-# Endpoint GET /pagamentos
-# Lista todos os pagamentos cadastrados no banco
 @app.get("/pagamentos")
 def listar_pagamentos():
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
-    cur.execute("SELECT id, valor FROM pagamentos")
+    cur.execute("SELECT id, produto_id, quantidade, valor FROM pagamentos")
     rows = cur.fetchall()
     conn.close()
-    return [{"id": r[0], "valor": float(r[1])} for r in rows]
+    return [{"id": r[0], "produto_id": r[1], "quantidade": r[2], "valor": float(r[3])} for r in rows]
 
-# Endpoint POST /pagamentos
-# Registra um novo pagamento e dispara eventos para os observadores
 @app.post("/pagamentos")
 def registrar_pagamento(pagamento: Pagamento):
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
-    # Insere pagamento e retorna o ID gerado
-    cur.execute("INSERT INTO pagamentos (valor) VALUES (%s) RETURNING id", (pagamento.valor,))
-    pagamento_id = cur.fetchone()[0]
+
+    # Busca produto
+    cur.execute("SELECT preco, quantidade FROM produtos WHERE id = %s", (pagamento.produto_id,))
+    produto = cur.fetchone()
+    if not produto:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+
+    preco, estoque = produto
+    valor_esperado = preco * pagamento.quantidade
+
+    # Valida valor
+    if pagamento.valor != valor_esperado:
+        conn.close()
+        raise HTTPException(status_code=400, detail=f"Valor incorreto. Esperado: {valor_esperado}")
+
+    # Valida estoque
+    if pagamento.quantidade > estoque:
+        conn.close()
+        raise HTTPException(status_code=400, detail="Estoque insuficiente")
+
+    # Atualiza estoque
+    novo_estoque = estoque - pagamento.quantidade
+    cur.execute("UPDATE produtos SET quantidade = %s WHERE id = %s", (novo_estoque, pagamento.produto_id))
+
+    # Registra pagamento
+    cur.execute(
+        "INSERT INTO pagamentos (produto_id, quantidade, valor) VALUES (%s, %s, %s) RETURNING id",
+        (pagamento.produto_id, pagamento.quantidade, pagamento.valor)
+    )
+    novo_id = cur.fetchone()[0]
+
     conn.commit()
     conn.close()
-
-    # Dispara eventos simulados (Observer Pattern)
-    notificar_email(pagamento_id)
-    atualizar_estoque(pagamento_id)
-
-    return {"mensagem": "Pagamento registrado com sucesso!", "id": pagamento_id}
+    return {"mensagem": "Pagamento registrado com sucesso!", "id": novo_id}
