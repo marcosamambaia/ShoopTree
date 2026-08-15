@@ -1,5 +1,5 @@
 # ShoopTree — Prova de Conceito
-
+@@@@
 ##  Objetivo
 Este projeto é uma prova de conceito funcional que demonstra:
 - Arquitetura de **microserviços** independentes em **Python/FastAPI**.
