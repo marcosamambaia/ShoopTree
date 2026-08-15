@@ -46,7 +46,9 @@ services:
       - shoopnet
 
   shoop_api:
-    build: ./shoop_api
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: shoop_api
     ports:
       - "8080:8080"

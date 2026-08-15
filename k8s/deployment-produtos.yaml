@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: produtos
-          image: produtos:latest   # nome correto
+          image: produtos-service:latest   # nome correto
           imagePullPolicy: Never
           ports:
             - containerPort: 8000

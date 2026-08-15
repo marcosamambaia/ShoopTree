@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: pagamentos
-          image: pagamentos:latest   # nome correto da imagem
+          image: pagamentos-service:latest   # nome correto da imagem
           imagePullPolicy: Never               # não tenta puxar da internet
           ports:
             - containerPort: 8001

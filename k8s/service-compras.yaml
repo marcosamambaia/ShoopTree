@@ -7,6 +7,6 @@ spec:
     app: compras
   ports:
     - protocol: TCP
-      port: 8002
-      targetPort: 8002
+      port: 80          # porta dentro do cluster
+      targetPort: 8080  # porta do container (definida no Deployment)
   type: NodePort
