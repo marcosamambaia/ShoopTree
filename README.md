@@ -50,7 +50,17 @@ Foi aplicado o **Observer Pattern**:
  Justificativa: O Observer Pattern é ideal para simular uma arquitetura orientada a eventos, pois desacopla produtores e consumidores, permitindo que múltiplos serviços reajam a um mesmo evento sem dependência direta.
 
 ---
+## 🏗️ Descrição da Arquitetura
+A arquitetura da ShoopTree foi modernizada para sair do modelo monolítico e adotar microserviços independentes:
+- **Shoop API Gateway** centraliza requisições e publica eventos.
+- **Serviço de Produtos** gerencia catálogo e estoque.
+- **Serviço de Pagamentos** processa transações financeiras.
+- **EventBus (Observer Pattern)** simula comunicação orientada a eventos.
+- **Consumidores** (PagamentoConsumer e NotificacaoConsumer) reagem aos eventos de compra.
+- **Banco de Dados PostgreSQL** garante persistência dos dados.
 
+Essa arquitetura melhora escalabilidade, isolamento de falhas e clareza de responsabilidades.
+---
 Instruções de Execução
 1. Ambiente Local (Podman/Docker)
 Logar no Docker Hub:
